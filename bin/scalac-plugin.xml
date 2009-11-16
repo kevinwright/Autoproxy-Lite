@@ -1,0 +1,4 @@
+<plugin>
+  <name>autoproxy</name>
+  <classname>autoproxy.plugin.AutoProxyPlugin</classname>
+</plugin>
