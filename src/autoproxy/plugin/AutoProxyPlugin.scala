@@ -88,6 +88,7 @@ class AutoProxyPlugin(val global: Global) extends Plugin {
     new GenerateSynthetics(this, global),
     //new TreePrinter(global, "generatesynthetics"),
     new ErrorRetyper(this, global)
-    //new TreePrinter(global, "retypeerrors")
+    //new TreePrinter(global, "errorretyper")
   )
+  
 }

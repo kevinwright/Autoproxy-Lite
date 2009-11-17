@@ -23,7 +23,7 @@ class ErrorRetyper(plugin: AutoProxyPlugin, val global : Global) extends PluginC
   	  
   val runsAfter = List[String]("generatesynthetics")
   override val runsBefore = List[String]("namer")
-  val phaseName = "retypeerrors"
+  val phaseName = "errorretyper"
   def newTransformer(unit: CompilationUnit) = new RetypingTransformer(unit)    
 
   object ErrorCleaner extends Traverser {

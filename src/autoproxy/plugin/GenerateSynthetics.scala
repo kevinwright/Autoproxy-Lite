@@ -66,33 +66,41 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global : Global) extends P
     }
       
     
-    def generateDelegates(templ: Template, memberToProxy: Symbol) : List[Tree] = {
-      val cls = memberToProxy.owner  //the class owning the symbol
+    def generateDelegates(templ: Template, symbolToProxy: Symbol) : List[Tree] = {
+      val cls = symbolToProxy.owner  //the class owning the symbol
     	
-      log("found annotated member: " + memberToProxy)
+      log("proxying symbol: " + symbolToProxy)
       log("owning class: " + cls)
         
       val definedMethods = publicMembersOf(cls)
       val requiredMethods =
-        publicMembersOf(memberToProxy).filter(mem => !definedMethods.contains(mem))
+        publicMembersOf(symbolToProxy).filter(mem => !definedMethods.contains(mem))
     	
       log("defined methods: " + definedMethods.mkString(", "))
       log("missing methods: " + requiredMethods.mkString(", "))
 
       val synthetics = for (method <- requiredMethods) yield
-        mkDelegate(cls, memberToProxy, method, memberToProxy.pos.focus)
+        mkDelegate(cls, symbolToProxy, method, symbolToProxy.pos.focus)
       
       synthetics
     }
    
     override def transform(tree: Tree) : Tree = {
-	  def shouldAutoProxy(tree: Tree) = 
-	      tree.symbol.annotations exists { _.toString == plugin.AutoproxyAnnotationClass }
+      def isAccessor(tree: Tree) = tree match {
+    	case m:MemberDef if m.mods.isAccessor => true
+    	case _ => false
+      }
+      
+	  def shouldAutoProxy(tree: Tree) =
+	 	!isAccessor(tree) &&
+	    (tree.symbol.annotations exists { _.toString == plugin.AutoproxyAnnotationClass })
 		   
 	  val newTree = tree match {
 	    case ClassDef(mods,name,tparams,impl) =>
-	      val delegs = for (member <- impl.body if shouldAutoProxy(member)) yield
+	      val delegs = for (member <- impl.body if shouldAutoProxy(member)) yield {
+	     	log("found annotated member: " + member)
 	        generateDelegates(impl, member.symbol)
+	      }
 	      val newImpl = treeCopy.Template(impl, impl.parents, impl.self, delegs.flatten ::: impl.body)
 	      treeCopy.ClassDef(tree, mods, name, tparams, newImpl)
 	    case _ => tree

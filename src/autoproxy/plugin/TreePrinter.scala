@@ -16,7 +16,7 @@ class TreePrinter(val global : Global, after: String) extends PluginComponent {
  
     def newPhase(_prev: Phase): StdPhase = new StdPhase(_prev) {
       def apply(unit: CompilationUnit) {
-    	if (unit.source.path.contains("Main")) {
+    	if (unit.source.path.contains("Bar")) {
     	  println("====================")
     	  println("after " + after + ": " + unit.source.path)
     	  //println("scope: " + globalDecls.toList.mkString);
