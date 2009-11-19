@@ -91,9 +91,17 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global : Global) extends P
     	case _ => false
       }
       
-	  def shouldAutoProxy(tree: Tree) =
-	 	!isAccessor(tree) &&
-	    (tree.symbol.annotations exists { _.toString == plugin.AutoproxyAnnotationClass })
+	  def shouldAutoProxySym(sym: Symbol) = {	 	
+	 	if (sym != null) {
+	 	  val testSym = if (sym.isModule) sym.moduleClass else sym
+          testSym.annotations exists { _.toString == plugin.AutoproxyAnnotationClass }
+	 	} else false
+	  }
+
+	  def shouldAutoProxy(tree: Tree) = {
+	 	val nodeStr = nodePrinters.nodeToString(tree)
+	 	!isAccessor(tree) && shouldAutoProxySym(tree.symbol)
+	  }
 		   
 	  val newTree = tree match {
 	    case ClassDef(mods,name,tparams,impl) =>

@@ -6,6 +6,11 @@ import nsc.Phase
 import nsc.plugins.Plugin
 import nsc.plugins.PluginComponent
 
+/**
+ * For units that contain the string "@print-compiler-debug"
+ * (usually in a comment)
+ * Prints the AST after the specified phase 
+ */
 class TreePrinter(val global : Global, after: String) extends PluginComponent {
 	import global._
     val phaseName = "treeprinter-" + after
@@ -16,8 +21,8 @@ class TreePrinter(val global : Global, after: String) extends PluginComponent {
  
     def newPhase(_prev: Phase): StdPhase = new StdPhase(_prev) {
       def apply(unit: CompilationUnit) {
-    	if (unit.source.path.contains("Bar")) {
-    	  println("====================")
+    	if (unit.comments.exists(_.text.contains("@print-compiler-debug"))) {
+          println("====================")
     	  println("after " + after + ": " + unit.source.path)
     	  //println("scope: " + globalDecls.toList.mkString);
     	  println("--------------------")
