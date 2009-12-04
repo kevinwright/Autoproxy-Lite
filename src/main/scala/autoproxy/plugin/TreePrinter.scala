@@ -21,15 +21,27 @@ class TreePrinter(val global : Global, after: String) extends PluginComponent {
  
     def newPhase(_prev: Phase): StdPhase = new StdPhase(_prev) {
       def apply(unit: CompilationUnit) {
-    	if (unit.comments.exists(_.text.contains("@print-compiler-debug"))) {
+    	val printTxt = unit.comments.exists(_.text.contains("@compiler-debug-print-txt-after-" + after))
+    	val printAst = unit.comments.exists(_.text.contains("@compiler-debug-print-ast-after-" + after))
+    	val browseAst = unit.comments.exists(_.text.contains("@compiler-debug-browse-ast-after-" + after))
+    	
+    	if (printTxt || printAst) {
           println("====================")
     	  println("after " + after + ": " + unit.source.path)
     	  //println("scope: " + globalDecls.toList.mkString);
-    	  println("--------------------")
-          println(unit.body)
-    	  println("--------------------")
-          println(nodePrinters nodeToString unit.body)
+    	  if (printTxt) {
+    	    println("--------------------")
+            println(unit.body)
+    	  }
+          if (printAst) {
+    	    println("--------------------")
+            println(nodePrinters nodeToString unit.body)
+          }
     	  println("====================")
+    	}
+    	
+    	if (browseAst) {
+    	  treeBrowser.browse(unit.body)
     	}
       }
     }

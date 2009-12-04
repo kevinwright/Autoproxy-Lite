@@ -52,7 +52,7 @@ class AutoProxyPlugin(val global: Global) extends Plugin {
   object earlyTyper extends PluginComponent {
 	val global : AutoProxyPlugin.this.global.type = AutoProxyPlugin.this.global
     val phaseName = "earlytyper"
-    val runsAfter = List[String]()
+    val runsAfter = List[String]("earlynamer")
     override val runsRightAfter = Some("earlynamer")
     def newPhase(_prev: Phase): StdPhase = new StdPhase(_prev) {
       import analyzer.{resetTyper, newTyper, rootContext}
@@ -81,14 +81,14 @@ class AutoProxyPlugin(val global: Global) extends Plugin {
   }
       
   val components = List[PluginComponent](
-    //new TreePrinter(global, "parser"),
+    new TreePrinter(global, "parser"),
     earlyNamer,
     earlyTyper,
-    //new TreePrinter(global, "earlytyper"),
+    new TreePrinter(global, "earlytyper"),
     new GenerateSynthetics(this, global),
     new TreePrinter(global, "generatesynthetics"),
-    new ErrorRetyper(this, global)
-    //new TreePrinter(global, "errorretyper")
+    new ErrorRetyper(this, global),
+    new TreePrinter(global, "errorretyper")
   )
   
 }

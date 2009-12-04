@@ -10,6 +10,7 @@ import nsc.transform.InfoTransform
 import nsc.transform.TypingTransformers
 import nsc.symtab.Flags._
 import nsc.util.Position
+import nsc.util.NoPosition
 import nsc.ast.TreeDSL
 import nsc.typechecker
 import scala.annotation.tailrec
@@ -30,9 +31,24 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global : Global) extends P
   class AutoProxyTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
     import CODE._
 
+    private def cloneMethod(prototype: Symbol, owner: Symbol) = {
+//      val newSym = prototype.cloneSymbol(owner)
+//      newSym setPos owner.pos.focus
+//      newSym setFlag SYNTHETICMETH
+//      owner.info.decls enter newSym
+    	val methodName = prototype.name
+    	val flags = SYNTHETICMETH | (if(prototype.isStable) STABLE else 0)
+    	val method = owner.newMethod(NoPosition, methodName) setFlag flags
+//    	method setPos owner.pos.focus
+        method setInfo prototype.info
+        owner.info.decls.enter(method).asInstanceOf[TermSymbol]
+    }
+
+    
     private def mkDelegate(owner: Symbol, tgtMember: Symbol, tgtMethod: Symbol, pos: Position) = {
       val delegate = cloneMethod(tgtMethod, owner)
-	        
+      delegate setPos tgtMember.pos.focus
+
       log("owner=" + This(owner))
 	  
       val selectTarget = This(owner) DOT tgtMember DOT tgtMethod
@@ -57,14 +73,7 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global : Global) extends P
 	
     private def publicMethodsOf(sym:Symbol) =
       publicMembersOf(sym).filter(_.isMethod)
-  
-    private def cloneMethod(prototype: Symbol, owner: Symbol) = {
-      val newSym = prototype.cloneSymbol(owner)
-      newSym setPos owner.pos.focus
-      newSym setFlag SYNTHETICMETH
-      owner.info.decls enter newSym    	
-    }
-      
+          
     
     def generateDelegates(templ: Template, symbolToProxy: Symbol) : List[Tree] = {
       val cls = symbolToProxy.owner  //the class owning the symbol
