@@ -29,46 +29,39 @@ class ErrorRetyper(plugin: AutoProxyPlugin, val global : Global) extends PluginC
   object ErrorCleaner extends Traverser {
     override def traverse(tree: Tree) = {
       if (tree.tpe == ErrorType) tree.tpe = null;
-      //if (tree.symbol == null || tree.symbol == NoSymbol) tree.symbol = null
+      if (tree.symbol != null && tree.symbol.isErroneous) tree.symbol = NoSymbol
       super.traverse(tree)
     }
   } 
-
-  object SymbolCleaner extends Traverser {
-    override def traverse(tree: Tree) = {
-      if (tree.symbol.isErroneous) {
- 		tree.symbol = NoSymbol
-      }	 	
-      super.traverse(tree)
-    }
-  } 
-
+  
   class RetypingTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
-	val localNamer: analyzer.Namer = analyzer.newNamer(
-      analyzer.rootContext(unit))
-//      analyzer.rootContext(unit, EmptyTree, true))
+	var cleaning:Boolean = false
+	
     override def transform(tree: Tree) : Tree = {
-      if (tree.tpe == ErrorType) {
-    	log("retyping: " + tree)
-    	//log("tree: " + global.nodePrinters.nodeToString(tree))
-	 	ErrorCleaner.traverse(tree)
-	 	localTyper.context1.reportGeneralErrors = true
-	 	
-    	log("cleaned: " + tree)
+      if (cleaning) {
+    	log("cleaning: " + tree)
+	 	tree.tpe = null;
+        if (tree.symbol != null && tree.symbol.isErroneous) {
+          tree.symbol = NoSymbol
+          log("denamed: " + tree)
+        }
+        super.transform(tree)
+	  } else {
+        if (tree.tpe == ErrorType) {
+          cleaning = true
+    	  log("retyping: " + tree)
+          val cleantree = transform(tree)
+	 	  localTyper.context1.reportGeneralErrors = true
+    	  log("cleaned: " + tree)
 
-    	if (tree.symbol != null && tree.symbol.isErroneous) {
-	 		SymbolCleaner.traverse(tree)
-	 		//analyzer.newNamer(localTyper.context1).enterSym(tree)
-	 		//localNamer.enterSym(tree)
-            log("renamed: " + tree)
-	 	}	 	
-	 	
     	
-	 	val typedtree = localTyper.typed { super.transform(tree) }
-    	log("retyped: " + typedtree)
-        log("tree: " + global.nodePrinters.nodeToString(typedtree))
-    	typedtree
-	  } else { super.transform(tree) }
+	 	  val typedtree = localTyper.typed { cleantree }
+    	  log("retyped: " + typedtree)
+          log("retyped tree: " + global.nodePrinters.nodeToString(typedtree))
+    	  cleaning = false
+    	  typedtree
+	    } else { super.transform(tree) }
+	  }
 	}    
   }
 }

@@ -32,21 +32,23 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global : Global) extends P
     import CODE._
 
     private def cloneMethod(prototype: Symbol, owner: Symbol) = {
-//      val newSym = prototype.cloneSymbol(owner)
-//      newSym setPos owner.pos.focus
-//      newSym setFlag SYNTHETICMETH
-//      owner.info.decls enter newSym
-    	val methodName = prototype.name
-    	val flags = SYNTHETICMETH | (if(prototype.isStable) STABLE else 0)
-    	val method = owner.newMethod(NoPosition, methodName) setFlag flags
-//    	method setPos owner.pos.focus
+      val newSym = prototype.cloneSymbol(owner)
+      newSym setFlag SYNTHETICMETH
+      owner.info.decls enter newSym
+    }
+
+    private def cloneMethod2(prototype: Symbol, owner: Symbol) = {
+        val methodName = prototype.name
+        val flags = SYNTHETICMETH | (if(prototype.isStable) STABLE else 0)
+        val method = owner.newMethod(NoPosition, methodName) setFlag flags    	
         method setInfo prototype.info
         owner.info.decls.enter(method).asInstanceOf[TermSymbol]
     }
 
     
     private def mkDelegate(owner: Symbol, tgtMember: Symbol, tgtMethod: Symbol, pos: Position) = {
-      val delegate = cloneMethod(tgtMethod, owner)
+      //val delegate = cloneMethod(tgtMethod, owner)
+      val delegate = cloneMethod2(tgtMethod, owner)
       delegate setPos tgtMember.pos.focus
 
       log("owner=" + This(owner))

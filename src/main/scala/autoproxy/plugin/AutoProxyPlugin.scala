@@ -43,6 +43,7 @@ class AutoProxyPlugin(val global: Global) extends Plugin {
           global.reporter = cachedReporter
           if (silentReporter.errorReported) {
         	unitsInError += unit
+        	resetAllAttrs(unit.body)
           }
     	}
       }
@@ -61,25 +62,78 @@ class AutoProxyPlugin(val global: Global) extends Plugin {
         currentRun.units foreach applyPhase
       }
       def apply(unit: CompilationUnit) {
-    	val silentReporter = new SilentReporter
-    	val cachedReporter = global.reporter
-    	global.reporter = silentReporter
+    	if (!unitsInError.contains(unit)) {
+    	  val silentReporter = new SilentReporter
+    	  val cachedReporter = global.reporter
+    	  global.reporter = silentReporter
     	
-        try {
-          unit.body = newTyper(rootContext(unit)).typed(unit.body)
-          if (global.settings.Yrangepos.value && !global.reporter.hasErrors) global.validatePositions(unit.body)
-          for (workItem <- unit.toCheck) workItem()
-        } finally {
-          unit.toCheck.clear()
-          global.reporter = cachedReporter
-          if (silentReporter.errorReported) {
-        	unitsInError += unit
+          try {
+            unit.body = newTyper(rootContext(unit)).typed(unit.body)
+            if (global.settings.Yrangepos.value && !global.reporter.hasErrors) global.validatePositions(unit.body)
+            for (workItem <- unit.toCheck) workItem()
+          } finally {
+            unit.toCheck.clear()
+            global.reporter = cachedReporter
+            if (silentReporter.errorReported) {
+              unitsInError += unit
+              //resetAllAttrs(unit.body)
+            }
           }
-        }
+    	}
       }
     }
   }
-      
+
+  
+  
+  
+//  object lateNamer extends PluginComponent {
+//	val global : AutoProxyPlugin.this.global.type = AutoProxyPlugin.this.global
+//    val phaseName = "latenamer"
+//    val runsAfter = List[String]("generatesynthetics")
+//    def newPhase(_prev: Phase): StdPhase = new StdPhase(_prev) {
+//      override val checkable = false
+//      def apply(unit: CompilationUnit) {
+//        import analyzer.{newNamer, rootContext}
+//        if (unitsInError.contains(unit))
+//	      newNamer(rootContext(unit)).enterSym(unit.body)
+//      }
+//    }
+//  }
+//  
+//  object lateTyper extends PluginComponent {
+//	val global : AutoProxyPlugin.this.global.type = AutoProxyPlugin.this.global
+//    val phaseName = "latetyper"
+//    val runsAfter = List[String]("latenamer")
+//    override val runsRightAfter = Some("latenamer")
+//    def newPhase(_prev: Phase): StdPhase = new StdPhase(_prev) {
+//      import analyzer.{resetTyper, newTyper, rootContext}
+//      resetTyper()
+//      override def run { 
+//        currentRun.units foreach applyPhase
+//      }
+//      def apply(unit: CompilationUnit) {
+//    	val silentReporter = new SilentReporter
+//    	val cachedReporter = global.reporter
+//    	global.reporter = silentReporter
+//    	
+//        try {
+//          unit.body = newTyper(rootContext(unit)).typed(unit.body)
+//          if (global.settings.Yrangepos.value && !global.reporter.hasErrors) global.validatePositions(unit.body)
+//          for (workItem <- unit.toCheck) workItem()
+//        } finally {
+//          unit.toCheck.clear()
+//          global.reporter = cachedReporter
+//          if (silentReporter.errorReported) {
+//        	unitsInError += unit
+//          }
+//        }
+//      }
+//    }
+//  }
+  
+  
+  
   val components = List[PluginComponent](
     new TreePrinter(global, "parser"),
     earlyNamer,
