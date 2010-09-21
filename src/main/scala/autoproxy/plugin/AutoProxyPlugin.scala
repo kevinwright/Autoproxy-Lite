@@ -135,14 +135,14 @@ class AutoProxyPlugin(val global: Global) extends Plugin {
   
   
   val components = List[PluginComponent](
-    new TreePrinter(global, "parser"),
+    new MyTreePrinter(global, "parser"),
     earlyNamer,
     earlyTyper,
-    new TreePrinter(global, "earlytyper"),
+    new MyTreePrinter(global, "earlytyper"),
     new GenerateSynthetics(this, global),
-    new TreePrinter(global, "generatesynthetics"),
+    new MyTreePrinter(global, "generatesynthetics"),
     new ErrorRetyper(this, global),
-    new TreePrinter(global, "errorretyper")
+    new MyTreePrinter(global, "errorretyper")
   )
   
 }

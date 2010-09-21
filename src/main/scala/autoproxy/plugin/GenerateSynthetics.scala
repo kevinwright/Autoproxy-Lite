@@ -9,8 +9,8 @@ import nsc.transform.Transform
 import nsc.transform.InfoTransform
 import nsc.transform.TypingTransformers
 import nsc.symtab.Flags._
-import nsc.util.Position
-import nsc.util.NoPosition
+//import nsc.util.Position
+//import nsc.util.NoPosition
 import nsc.ast.TreeDSL
 import nsc.typechecker
 import scala.annotation.tailrec
