@@ -1,6 +1,8 @@
-
-/.classpath
-/.project
+/.metadata
+/target
+.classpath
+.project
+.scala_dependencies
 *.iml
 *.ipr
 *.iws
