@@ -14,7 +14,7 @@ class SilentReporter extends Reporter {
     severity match {
       case INFO =>
       case WARNING => warningReported = true
-      case ERROR => errorReported = true
+      case ERROR => println("silent error: " + msg); errorReported = true
     }
   }
 }

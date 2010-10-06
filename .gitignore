@@ -2,6 +2,7 @@
 /target
 .classpath
 .project
+.idea
 .scala_dependencies
 *.iml
 *.ipr

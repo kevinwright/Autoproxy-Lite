@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<project name="autoproxy-plugin" default="compile">
+
+	<property environment="env"/>
+	<property name="scala.home" value="${env.SCALA_HOME}" />
+	
+	<property name="classes.dir" value="target/classes" />
+	<property name="resources.dir" value="src/main/resources" />
+	<property name="src.dir" value="src/main/scala" />
+	
+	<target name="init">
+		<property name="scala-library.jar" value="${scala.home}/lib/scala-library.jar" />
+		<property name="scala-compiler.jar" value="${scala.home}/lib/scala-compiler.jar" />
+		<property name="fjbg.jar" value="${scala.home}/lib/fjbg.jar" />
+		<property name="jline.jar" value="${scala.home}/lib/jline.jar" />
+		<property name="msil.jar" value="${scala.home}/lib/msil.jar" />
+		<path id="build.classpath">
+			<pathelement location="${scala-library.jar}" />
+			<pathelement location="${scala-compiler.jar}" />
+			<pathelement location="${fjbg.jar}" />
+			<pathelement location="${jline.jar}" />
+			<pathelement location="${msil.jar}" />
+			<pathelement location="${classes.dir}" />
+		</path>
+		<taskdef resource="scala/tools/ant/antlib.xml">
+			<classpath>
+				<pathelement location="${scala-compiler.jar}" />
+				<pathelement location="${scala-library.jar}" />
+				<pathelement location="${fjbg.jar}" />
+				<pathelement location="${jline.jar}" />
+				<pathelement location="${msil.jar}" />
+			</classpath>
+		</taskdef>
+	</target>
+
+	<target name="clean" description="remove intermediate files">
+		<delete dir="${classes.dir}"/>
+	</target>
+
+	<target name="clobber" depends="clean" description="remove all artifact files">
+		<delete file="target/jar/autoproxy-plugin.jar"/>
+	</target>
+
+	<target name="compile" depends="init" description="compile the Java source code to class files">
+		<mkdir dir="${classes.dir}"/>
+		<scalac srcdir="${src.dir}"
+			destdir="${classes.dir}"
+			classpathref="build.classpath"
+			addparams="-Xpluginsdir E:\dev\scala-plugin-workspace\autoproxy-plugin\target\jar">
+			<include name="**/*.scala"   />
+		</scalac>
+	</target>
+
+	<target name="jar" depends="compile" description="create a Jar file for the application">
+		<jar destfile="target/jar/autoproxy-plugin.jar">
+			<fileset dir="${classes.dir}" includes="**/*.class"/>
+			<fileset dir="${resources.dir}" includes="**/*"/>
+		</jar>
+	</target>
+
+</project>
