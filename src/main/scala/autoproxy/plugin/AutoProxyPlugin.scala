@@ -17,6 +17,8 @@ import scala.collection.mutable.{MutableList, HashMap}
 class AutoProxyPlugin(val global: Global) extends Plugin {
   import global._
 
+
+  println("AutoProxy Plugin Loaded")
   val unitRollback = new HashMap[CompilationUnit, Tree]
 //  val enteredSymbols = new HashMap[CompilationUnit, Seq[(Symbol, Scope)]]
 

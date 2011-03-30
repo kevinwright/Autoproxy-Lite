@@ -22,8 +22,10 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
         with TreeDSL
 {
   import global._
-  import definitions._
+  //import definitions._
 
+  import global.Tree
+  
   val runsAfter = List[String]("earlytyper")
   val phaseName = "generatesynthetics"
 
@@ -34,13 +36,13 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
 
     private def cloneMethod(prototype: Symbol, owner: Symbol) = {
       val newSym = prototype.cloneSymbol(owner)
-      newSym setFlag SYNTHETICMETH
+      newSym setFlag SYNTHETIC
       owner.info.decls enter newSym
     }
 
     private def cloneMethod2(prototype: Symbol, owner: Symbol) = {
       val methodName = prototype.name
-      val flags = SYNTHETICMETH | (if (prototype.isStable) STABLE else 0)
+      val flags = SYNTHETIC | (if (prototype.isStable) STABLE else 0)
       val method = owner.newMethod(NoPosition, methodName) setFlag flags
       method setInfo prototype.info
       owner.info.decls.enter(method).asInstanceOf[TermSymbol]
@@ -99,7 +101,7 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
 
     override def transform(tree: Tree): Tree = {
       def isAccessor(tree: Tree) = tree match {
-        case m: MemberDef if m.mods.isAccessor => true
+        case m: ValDef => true
         case _ => false
       }
 
