@@ -1,10 +1,9 @@
 package autoproxy.plugin
 
 import org.specs.Specification
-import tools.nsc.{CompilerCommand, Settings, Global, Main}
-import tools.nsc.reporters.{ConsoleReporter, StoreReporter}
-import tools.nsc.util.{ClassPath, FakePos}
-import tools.nsc.plugins.Plugin
+import tools.nsc.{CompilerCommand, Settings, Global}
+import tools.nsc.reporters.ConsoleReporter
+import tools.nsc.util.ClassPath
 
 class PluginSpec extends Specification {
   "The plugin should" should {
@@ -12,11 +11,11 @@ class PluginSpec extends Specification {
       def scalacError(msg: String): Unit = println(msg + "\n  scalac -help  gives more information")
 
       val context     = Thread.currentThread.getContextClassLoader.asInstanceOf[java.net.URLClassLoader]
-      val allcpurls      = context.getURLs.toList
-      val cpurls = allcpurls filter {url => !url.toString.contains("project/boot") }
+      val allcpurls   = context.getURLs.toList
+      val cpurls      = allcpurls filter {url => !url.toString.contains("project/boot") }
       val cpurlString = ClassPath.join(cpurls map (_.getPath) : _*)
       
-      val testRoot = "src/test/resources/autoproxy/test/"
+      val testRoot = "src/test/projects/simple/autoproxy/test/"
       val sources = List(
         "Main.scala",
         "PropertyAccessors.scala",
@@ -24,15 +23,14 @@ class PluginSpec extends Specification {
 
       val args = List(
         "-cp", cpurlString,
+        "-d", "target/test-projects/simple",
         "-verbose",
-        //"-usejavacp",
-        //"-nobootcp",
+        "-Xprint:generatesynthetics",
+//        "-Yshow-trees",
+//        "-Xshow-phases",
         "-Xplugin:test-projects/stub-jar/dynamic-mixin-stub.jar",
         "-Xplugin-require:autoproxy"
-//        "-Xshow-phases"
-//        "-Xplugin-list"
       ) ::: sources
-
 
       val ss       = new Settings(scalacError)
 //      val reporter = new StoreReporter
@@ -42,8 +40,7 @@ class PluginSpec extends Specification {
 
       val compiler = new Global(settings, reporter)
 
-//      new AutoProxyPlugin(compiler)
-      
+
       if (reporter.hasErrors) {
 //        reporter.infos foreach { println }
         reporter.flush

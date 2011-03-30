@@ -26,7 +26,7 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
 
   import global.Tree
   
-  val runsAfter = List[String]("earlytyper")
+  val runsAfter = List[String]("typer")
   val phaseName = "generatesynthetics"
 
   def newTransformer(unit: CompilationUnit) = new AutoProxyTransformer(unit)
@@ -88,7 +88,7 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
 
       val definedMethods = publicMembersOf(cls)
       val requiredMethods =
-      publicMembersOf(symbolToProxy).filter(mem => !definedMethods.contains(mem))
+        publicMembersOf(symbolToProxy).filter(mem => !definedMethods.contains(mem))
 
       log("defined methods: " + definedMethods.mkString(", "))
       log("missing methods: " + requiredMethods.mkString(", "))
@@ -106,14 +106,17 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       }
 
       def shouldAutoProxySym(sym: Symbol) = {
+        println("testing symbol")
         if (sym != null) {
           val testSym = if (sym.isModule) sym.moduleClass else sym
+          testSym.annotations foreach { println(_) }
           testSym.annotations exists {_.toString == plugin.AutoproxyAnnotationClass}
         } else false
       }
 
       def shouldAutoProxy(tree: Tree) = {
-        val nodeStr = nodePrinters.nodeToString(tree)
+//        val nodeStr = nodePrinters.nodeToString(tree)
+        println("testing tree")
         !isAccessor(tree) && shouldAutoProxySym(tree.symbol)
       }
 
@@ -121,6 +124,7 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
         case ClassDef(mods, name, tparams, impl) =>
           val delegs = for (member <- impl.body if shouldAutoProxy(member)) yield {
             log("found annotated member: " + member)
+            println(impl.symbol)
             generateDelegates(impl, member.symbol)
           }
           val newImpl = treeCopy.Template(impl, impl.parents, impl.self, delegs.flatten ::: impl.body)

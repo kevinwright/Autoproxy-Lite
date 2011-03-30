@@ -8,15 +8,15 @@ package autoproxy.test
 //@ compiler-debug-print-ast-after-errorretyper
 //@ compiler-debug-browse-ast-after-errorretyper
 
-class PropertyAccessorsProps {
+trait PropertyAccessorsProps {
   val s : String = "hello world"
   var i : Int = 0
 }
 
-class PropertyAccessors {	
+class PropertyAccessors extends PropertyAccessorsProps {
   
-  @proxy val props = new PropertyAccessorsProps
-  def i2 = props.i 
+  @proxy val props = new Object with PropertyAccessorsProps
+  def i2 = props.i
   def i2_=(x$1: Int) = props.i = x$1
 
 //  def s = props.s 
