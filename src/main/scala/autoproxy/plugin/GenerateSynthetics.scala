@@ -106,7 +106,7 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       }
 
       def shouldAutoProxySym(sym: Symbol) = {
-        println("testing symbol")
+//        println("testing symbol")
         if (sym != null) {
           val testSym = if (sym.isModule) sym.moduleClass else sym
           testSym.annotations foreach { println(_) }
@@ -116,15 +116,15 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
 
       def shouldAutoProxy(tree: Tree) = {
 //        val nodeStr = nodePrinters.nodeToString(tree)
-        println("testing tree")
+//        println("testing tree")
         !isAccessor(tree) && shouldAutoProxySym(tree.symbol)
       }
 
       val newTree = tree match {
         case ClassDef(mods, name, tparams, impl) =>
+//          println("got class: " + tree.symbol.tpe)
           val delegs = for (member <- impl.body if shouldAutoProxy(member)) yield {
             log("found annotated member: " + member)
-            println(impl.symbol)
             generateDelegates(impl, member.symbol)
           }
           val newImpl = treeCopy.Template(impl, impl.parents, impl.self, delegs.flatten ::: impl.body)

@@ -24,7 +24,7 @@ class PluginSpec extends Specification {
       val args = List(
         "-cp", cpurlString,
         "-d", "target/test-projects/simple",
-        "-verbose",
+//        "-verbose",
         "-Xprint:generatesynthetics",
 //        "-Yshow-trees",
 //        "-Xshow-phases",
