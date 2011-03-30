@@ -2,18 +2,10 @@ package autoproxy.plugin
 
 import scala.tools._
 import nsc.Global
-import nsc.Phase
-import nsc.plugins.Plugin
 import nsc.plugins.PluginComponent
-import nsc.transform.Transform
-import nsc.transform.InfoTransform
-import nsc.transform.TypingTransformers
+import nsc.transform.{Transform, TypingTransformers}
 import nsc.symtab.Flags._
-//import nsc.util.Position
-//import nsc.util.NoPosition
 import nsc.ast.TreeDSL
-import nsc.typechecker
-import scala.annotation.tailrec
 
 
 class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends PluginComponent
@@ -106,7 +98,6 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       }
 
       def shouldAutoProxySym(sym: Symbol) = {
-//        println("testing symbol")
         if (sym != null) {
           val testSym = if (sym.isModule) sym.moduleClass else sym
           testSym.annotations foreach { println(_) }
@@ -115,14 +106,11 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       }
 
       def shouldAutoProxy(tree: Tree) = {
-//        val nodeStr = nodePrinters.nodeToString(tree)
-//        println("testing tree")
         !isAccessor(tree) && shouldAutoProxySym(tree.symbol)
       }
 
       val newTree = tree match {
         case ClassDef(mods, name, tparams, impl) =>
-//          println("got class: " + tree.symbol.tpe)
           val delegs = for (member <- impl.body if shouldAutoProxy(member)) yield {
             log("found annotated member: " + member)
             generateDelegates(impl, member.symbol)
