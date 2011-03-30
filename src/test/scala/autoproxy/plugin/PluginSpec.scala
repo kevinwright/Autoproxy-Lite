@@ -4,11 +4,17 @@ import org.specs.Specification
 import tools.nsc.{CompilerCommand, Settings, Global}
 import tools.nsc.reporters.ConsoleReporter
 import tools.nsc.util.ClassPath
+import java.io.File
 
 class PluginSpec extends Specification {
   "The plugin should" should {
     "compile a simple class" in {
       def scalacError(msg: String): Unit = println(msg + "\n  scalac -help  gives more information")
+
+      val outputDir = "target/test-projects/simple"
+      try {
+        (new File(outputDir)).mkdirs
+      }
 
       val context     = Thread.currentThread.getContextClassLoader.asInstanceOf[java.net.URLClassLoader]
       val allcpurls   = context.getURLs.toList
@@ -23,12 +29,12 @@ class PluginSpec extends Specification {
 
       val args = List(
         "-cp", cpurlString,
-        "-d", "target/test-projects/simple",
+        "-d", outputDir,
 //        "-verbose",
         "-Xprint:generatesynthetics",
 //        "-Yshow-trees",
 //        "-Xshow-phases",
-        "-Xplugin:test-projects/stub-jar/dynamic-mixin-stub.jar",
+        "-Xplugin:src/test/stub-jar/dynamic-mixin-stub.jar",
         "-Xplugin-require:autoproxy"
       ) ::: sources
 
