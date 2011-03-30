@@ -1,9 +1,0 @@
-package autoproxy.test
-
-class RichFoo extends Foo {
-	def richMethod1 = "richMethod1"
-	def richMethod2(arg: String) = "richMethod2(" + arg + ")"	
-}
-
-
-

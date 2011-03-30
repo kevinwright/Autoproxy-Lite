@@ -1,1 +1,0 @@
-scalac -d ./cmdline-bin ./src/autoproxy/plugin/*.scala

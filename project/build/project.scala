@@ -1,7 +1,7 @@
 import sbt._
 import de.element34.sbteclipsify._
 
-class VisualizationDatasourceProject(info: ProjectInfo) extends DefaultProject(info)
+class AutoproxyLitePluginProject(info: ProjectInfo) extends DefaultProject(info)
 with IdeaProject
 with Eclipsify
 //with posterous.Publish
