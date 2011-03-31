@@ -11,7 +11,9 @@ class PluginSpec extends Specification {
     "compile a simple class" in {
       def scalacError(msg: String): Unit = println(msg + "\n  scalac -help  gives more information")
 
-      val outputDir = "target/test-projects/simple"
+      val testProjectRoot = "examples/simple/"
+      val inputDir = testProjectRoot + "src/main/scala/autoproxy/test/"
+      val outputDir = testProjectRoot + "target/classes"
       try {
         (new File(outputDir)).mkdirs
       }
@@ -25,16 +27,16 @@ class PluginSpec extends Specification {
       val sources = List(
         "Main.scala",
         "PropertyAccessors.scala",
-        "proxyAnnotation.scala") map {testRoot + _}
+        "proxyAnnotation.scala") map {inputDir + _}
 
       val args = List(
         "-cp", cpurlString,
         "-d", outputDir,
 //        "-verbose",
-        "-Xprint:generatesynthetics",
+//        "-Xprint:generatesynthetics",
 //        "-Yshow-trees",
 //        "-Xshow-phases",
-        "-Xplugin:src/test/stub-jar/dynamic-mixin-stub.jar",
+        "-Xplugin:plugin/src/test/stub-jar/dynamic-mixin-stub.jar",
         "-Xplugin-require:autoproxy"
       ) ::: sources
 
