@@ -52,7 +52,9 @@ with Eclipsify
       override def compileOptions = compileOptions(
         "-Xplugin:./plugin/target/scala_2.9.0.RC1/the-plugin_2.9.0.RC1-2.9.jar",
         "-Xplugin-require:autoproxy",
-        "-Xprint:generatesynthetics"
+        "-Xprint:generatesynthetics",
+        "-Ylog:generatesynthetics"
+//        "-Yshow-trees"
 //        "-usejavacp",
 //        "-nobootcp"
 //        "-Xplugin-list"

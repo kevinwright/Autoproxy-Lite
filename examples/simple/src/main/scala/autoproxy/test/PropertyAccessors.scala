@@ -1,5 +1,5 @@
 package autoproxy.test
-//import autoproxy.annotation.proxy
+import autoproxy.annotation.proxy
 
 class PropertyAccessorsProps {
   val s: String = "hello world"

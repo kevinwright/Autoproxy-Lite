@@ -79,14 +79,18 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       log("owning class: " + cls)
 
       val definedMethods = publicMembersOf(cls)
-      val requiredMethods =
+      val abstractMethods = definedMethods.filter(_.isIncompleteIn(cls))
+      val missingMethods =
         publicMembersOf(symbolToProxy).filter(mem => !definedMethods.contains(mem))
 
+      //TODO: investigate why missingMethods was picking up on `toString`
+      val requiredMethods = abstractMethods
+      
       log("defined methods: " + definedMethods.mkString(", "))
-      log("missing methods: " + requiredMethods.mkString(", "))
+      log("abstract methods: " + abstractMethods.mkString(", "))
+      log("missing methods: " + missingMethods.mkString(", "))
 
-      val synthetics = for (method <- requiredMethods) yield
-        mkDelegate(cls, symbolToProxy, method, symbolToProxy.pos.focus)
+      val synthetics = requiredMethods map { mkDelegate(cls, symbolToProxy, _, symbolToProxy.pos.focus) }
 
       synthetics
     }
@@ -98,15 +102,18 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       }
 
       def shouldAutoProxySym(sym: Symbol) = {
+        println("testing... " + sym)
         if (sym != null) {
           val testSym = if (sym.isModule) sym.moduleClass else sym
           testSym.annotations foreach { println(_) }
-          testSym.annotations exists {_.toString == plugin.AutoproxyAnnotationClass}
+          val gotOne = testSym.annotations exists {_.toString == plugin.AutoproxyAnnotationClass}
+          if(gotOne) println("got one! " + testSym)
+          gotOne
         } else false
       }
 
       def shouldAutoProxy(tree: Tree) = {
-        !isAccessor(tree) && shouldAutoProxySym(tree.symbol)
+        isAccessor(tree) && shouldAutoProxySym(tree.symbol)
       }
 
       val newTree = tree match {

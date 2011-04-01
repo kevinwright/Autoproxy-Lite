@@ -1,5 +1,7 @@
 package autoproxy.test
 
+import autoproxy.annotation.proxy
+
 
 trait DynamicMixin {
   def theString: String

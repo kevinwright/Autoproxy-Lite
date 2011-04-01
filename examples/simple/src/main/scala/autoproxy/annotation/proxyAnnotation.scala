@@ -1,4 +1,4 @@
-package autoproxy.test
+package autoproxy.annotation
 
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
@@ -39,5 +39,5 @@ package autoproxy.test
  *    (i.e. same name and signature) in the containing object.
  *  </p>
  */
-class proxy extends StaticAnnotation
+class proxy extends scala.annotation.StaticAnnotation
 
