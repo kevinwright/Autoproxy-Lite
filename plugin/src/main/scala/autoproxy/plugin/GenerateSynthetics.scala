@@ -48,7 +48,10 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
 
       log("owner=" + This(owner))
 
-      val selectTarget = This(owner) DOT tgtMember DOT tgtMethod
+      val tgtGetter = if(tgtMember.hasGetter) tgtMember.getter(owner) else tgtMember
+      log("target getter: " + tgtGetter)
+
+      val selectTarget = This(owner) DOT tgtGetter DOT tgtMethod
       log("SelectTarget=")
       log(nodeToString(selectTarget))
 
@@ -78,17 +81,37 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       log("proxying symbol: " + symbolToProxy)
       log("owning class: " + cls)
 
-      val definedMethods = publicMembersOf(cls)
-      val abstractMethods = definedMethods.filter(_.isIncompleteIn(cls))
-      val missingMethods =
-        publicMembersOf(symbolToProxy).filter(mem => !definedMethods.contains(mem))
+      //need to find methods that are ONLY inherited from the type being proxied.
+      //if available through any other route, then don't create the delegate.
 
-      //TODO: investigate why missingMethods was picking up on `toString`
-      val requiredMethods = abstractMethods
-      
-      log("defined methods: " + definedMethods.mkString(", "))
-      log("abstract methods: " + abstractMethods.mkString(", "))
-      log("missing methods: " + missingMethods.mkString(", "))
+      //first, locate all concrete public methods inherited from a superclass other than the proxy source
+      val parents = cls.info.parents filter {symbolToProxy.tpe != }
+      val nonProxyBaseClasses = parents.flatMap(_.baseClasses).distinct
+      val nonProxyInheritedMethods = nonProxyBaseClasses.flatMap(publicMethodsOf).distinct
+      val inheritedExclusions = nonProxyInheritedMethods.filterNot(_.isIncompleteIn(cls))
+      log("inherited exclusions: " + inheritedExclusions.mkString(", "))
+
+      // now locate all methods on the receiving class, and separate those which are inherited
+      val definedMethods = publicMethodsOf(cls)
+      val inheritedMethods = definedMethods.filter(_.owner != cls)
+      val locallyDefinedMethods = definedMethods.filter(_.owner == cls)
+      log("locally defined: " + locallyDefinedMethods.mkString(", "))
+
+      //determine all methods that should be excluded from consideration for proxying
+      val exclusions = inheritedExclusions ++ locallyDefinedMethods
+      log("all exclusions: " + exclusions.mkString(", "))
+
+      //now locate all methods available via the proxy source, and remove exclusions
+      val candidates = publicMembersOf(symbolToProxy)
+      log("candidates: " + candidates.mkString(", "))
+      val requiredMethods = candidates filterNot (exclusions contains)
+      log("required methods: " + requiredMethods.mkString(", "))
+
+      //val abstractMethods = definedMethods.filter(_.isIncompleteIn(cls))
+      //val missingMethods =
+      //  publicMembersOf(symbolToProxy).filter(mem => !definedMethods.contains(mem))
+
+
 
       val synthetics = requiredMethods map { mkDelegate(cls, symbolToProxy, _, symbolToProxy.pos.focus) }
 

@@ -55,6 +55,7 @@ with Eclipsify
         "-Xprint:generatesynthetics",
         "-Ylog:generatesynthetics"
 //        "-Yshow-trees"
+//        "-Yshow-trees"
 //        "-usejavacp",
 //        "-nobootcp"
 //        "-Xplugin-list"

@@ -1,14 +1,14 @@
 package autoproxy.test
 import autoproxy.annotation.proxy
 
-class PropertyAccessorsProps {
+trait PropertyAccessorsProps {
   val s: String = "hello world"
   var i: Int = 0
 }
 
 class PropertyAccessors extends PropertyAccessorsProps {
   
-  @proxy val props = new PropertyAccessorsProps
+  @proxy val props: PropertyAccessorsProps = new Object with PropertyAccessorsProps
   def i2 = props.i
   def i2_=(x$1: Int) = props.i = x$1
 
