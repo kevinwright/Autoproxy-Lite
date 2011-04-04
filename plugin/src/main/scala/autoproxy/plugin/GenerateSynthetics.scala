@@ -29,6 +29,9 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
     private def cloneMethod(prototype: Symbol, owner: Symbol) = {
       val newSym = prototype.cloneSymbol(owner)
       newSym setFlag SYNTHETIC
+      newSym resetFlag ABSTRACT
+      newSym resetFlag DEFERRED
+      if (prototype.isStable) (newSym setFlag STABLE)
       owner.info.decls enter newSym
     }
 
@@ -42,28 +45,30 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
 
 
     private def mkDelegate(owner: Symbol, tgtMember: Symbol, tgtMethod: Symbol, pos: Position) = {
-      //val delegate = cloneMethod(tgtMethod, owner)
-      val delegate = cloneMethod2(tgtMethod, owner)
+      val delegate = cloneMethod(tgtMethod, owner)
+      //val delegate = cloneMethod2(tgtMethod, owner)
       delegate setPos tgtMember.pos.focus
 
-      log("owner=" + This(owner))
+      log("owner = " + This(owner))
 
       val tgtGetter = if(tgtMember.hasGetter) tgtMember.getter(owner) else tgtMember
-      log("target getter: " + tgtGetter)
+      log("target getter = " + tgtGetter)
 
       val selectTarget = This(owner) DOT tgtGetter DOT tgtMethod
-      log("SelectTarget=")
-      log(nodeToString(selectTarget))
+      log("SelectTarget = " + nodeToString(selectTarget))
 
       val rhs: Tree =
-      delegate.info match {
-        case MethodType(params, _) => Apply(selectTarget, params.map(Ident(_)))
-        case _ => selectTarget
-      }
+        delegate.info match {
+          case MethodType(params, _) => Apply(selectTarget, params.map(Ident(_)))
+          case _ => selectTarget
+        }
+
+      //global.analyzer.UnTyper.traverse(rhs)
+      log("rhs=" + nodeToString(rhs))
 
       val delegateDef = localTyper.typed {DEF(delegate) === rhs}
 
-      log(nodePrinters nodeToString delegateDef)
+      log("delegate = " + nodeToString(delegateDef))
 
       delegateDef
     }
@@ -107,6 +112,8 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       val requiredMethods = candidates filterNot (exclusions contains)
       log("required methods: " + requiredMethods.mkString(", "))
 
+      val needsOverride = requiredMethods.filterNot(_.isIncompleteIn(cls))
+      log("needs override: " + needsOverride.mkString(", "))
       //val abstractMethods = definedMethods.filter(_.isIncompleteIn(cls))
       //val missingMethods =
       //  publicMembersOf(symbolToProxy).filter(mem => !definedMethods.contains(mem))
