@@ -17,8 +17,11 @@ with Eclipsify
   /////////////////
   // Sub-projects
   
+  lazy val theAnnotation = project("annotation", "Annotation", new TheAnnotation(_))
   lazy val thePlugin = project("plugin", "The plugin", new ThePlugin(_))
   lazy val examples = project("examples", "Examples", new Examples(_))
+
+  class TheAnnotation(info: ProjectInfo) extends DefaultProject(info) with IdeaProject
 
   class ThePlugin(info: ProjectInfo) extends DefaultProject(info) with IdeaProject {
   
@@ -46,21 +49,21 @@ with Eclipsify
   }
   
   class Examples(info: ProjectInfo) extends ParentProject(info) with IdeaProject{
-    lazy val simple = project("simple", "Simple Example", new ExampleProject(_), thePlugin)
+    lazy val simple = project("simple", "Simple Example", new ExampleProject(_), theAnnotation, thePlugin)
 
     class ExampleProject(info: ProjectInfo) extends DefaultProject(info) with IdeaProject {
       override def compileOptions = compileOptions(
         "-Xplugin:./plugin/target/scala_2.9.0.RC1/the-plugin_2.9.0.RC1-2.9.jar",
-        "-Xplugin-require:autoproxy",
+        "-Xplugin-require:autoproxy"
 //        "-Xprint:generatesynthetics",
-        "-Xprint:lazyvals",
-        "-Ylog:generatesynthetics",
+//        "-Xprint:lazyvals",
+//        "-Ylog:generatesynthetics",
 //        "-Ylog:lambdalift",
 //        "-Ydebug",
 //        "-Yshow-syms",
 //        "-Ycheck:generatesynthetics"
 //        "-Ycheck:lazyvals"
-        "-Ybrowse:lazyvals"
+//        "-Ybrowse:lazyvals"
 //        "-Yshow-trees"
 //        "-Yshow-trees"
 //        "-usejavacp",

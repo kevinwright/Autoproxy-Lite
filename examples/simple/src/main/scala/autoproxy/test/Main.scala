@@ -23,8 +23,8 @@ object Main {
 		val pa = new PropertyAccessors
 		
 		
-//		pa.i2 = 42
-//		pa.i = 42
+		pa.i2 = 42
+		pa.i = 42
 		println("i=" + pa.i)				
 		println("i2=" + pa.i2)				
 		println("s=" + pa.s)				

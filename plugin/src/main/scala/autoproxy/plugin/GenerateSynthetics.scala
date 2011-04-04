@@ -132,12 +132,12 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       }
 
       def shouldAutoProxySym(sym: Symbol) = {
-        println("testing... " + sym)
+        log("testing symbol: " + sym)
         if (sym != null) {
           val testSym = if (sym.isModule) sym.moduleClass else sym
-          testSym.annotations foreach { println(_) }
+          testSym.annotations foreach { ann => log("annotation:" + ann) }
           val gotOne = testSym.annotations exists {_.toString == plugin.AutoproxyAnnotationClass}
-          if(gotOne) println("got one! " + testSym)
+          if(gotOne) log("got a live one here!")
           gotOne
         } else false
       }
