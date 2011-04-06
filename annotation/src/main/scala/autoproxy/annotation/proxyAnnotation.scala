@@ -1,5 +1,7 @@
 package autoproxy.annotation
 
+import annotation.target.field
+
 /*                     __                                               *\
 **     ________ ___   / /  ___     Scala API                            **
 **    / __/ __// _ | / /  / _ |    (c) 2002-2009, LAMP/EPFL             **
@@ -39,5 +41,6 @@ package autoproxy.annotation
  *    (i.e. same name and signature) in the containing object.
  *  </p>
  */
+@field
 class proxy extends scala.annotation.StaticAnnotation
 

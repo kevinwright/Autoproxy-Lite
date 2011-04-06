@@ -136,14 +136,15 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
         if (sym != null) {
           val testSym = if (sym.isModule) sym.moduleClass else sym
           testSym.annotations foreach { ann => log("annotation:" + ann) }
-          val gotOne = testSym.annotations exists {_.toString == plugin.AutoproxyAnnotationClass}
+          val gotOne = testSym.annotations exists {_.toString startsWith plugin.AutoproxyAnnotationClass}
           if(gotOne) log("got a live one here!")
           gotOne
         } else false
       }
 
       def shouldAutoProxy(tree: Tree) = {
-        isAccessor(tree) && shouldAutoProxySym(tree.symbol)
+        //isAccessor(tree) &&
+        shouldAutoProxySym(tree.symbol)
       }
 
       val newTree = tree match {
