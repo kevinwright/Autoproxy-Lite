@@ -52,6 +52,7 @@ with Eclipsify
     lazy val simple = project("simple", "Simple Example", new ExampleProject(_), theAnnotation, thePlugin)
 
     class ExampleProject(info: ProjectInfo) extends DefaultProject(info) with IdeaProject {
+
       override def compileOptions = compileOptions(
         "-Xplugin:./plugin/target/scala_" + buildScalaVersion + "/the-plugin_" + buildScalaVersion + "-2.9.jar",
 //        "-verbose",

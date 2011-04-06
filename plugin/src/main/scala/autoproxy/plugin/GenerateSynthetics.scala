@@ -99,7 +99,7 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       // now locate all methods on the receiving class, and separate those which are inherited
       val definedMethods = publicMethodsOf(cls)
       val inheritedMethods = definedMethods.filter(_.owner != cls)
-      val locallyDefinedMethods = definedMethods.filter(_.owner == cls)
+      val locallyDefinedMethods = definedMethods.filter(_.owner == cls).flatMap(_.allOverriddenSymbols)
       log("locally defined: " + locallyDefinedMethods.mkString(", "))
 
       //determine all methods that should be excluded from consideration for proxying
@@ -110,7 +110,7 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       val candidates = publicMembersOf(symbolToProxy)
       log("candidates: " + candidates.mkString(", "))
       val requiredMethods = candidates filterNot (exclusions contains)
-      log("required methods: " + requiredMethods.mkString(", "))
+      log("required methods (candidates - exclusions): " + requiredMethods.mkString(", "))
 
       val needsOverride = requiredMethods.filterNot(_.isIncompleteIn(cls))
       log("needs override: " + needsOverride.mkString(", "))
