@@ -53,7 +53,11 @@ with Eclipsify
 
     class ExampleProject(info: ProjectInfo) extends DefaultProject(info) with IdeaProject {
       override def compileOptions = compileOptions(
-        "-Xplugin:./plugin/target/scala_2.9.0.RC1/the-plugin_2.9.0.RC1-2.9.jar",
+        "-Xplugin:./plugin/target/scala_" + buildScalaVersion + "/the-plugin_" + buildScalaVersion + "-2.9.jar",
+//        "-verbose",
+//        "-usejavacp",
+//        "-nobootcp",
+//        "-Xplugin:plugin/src/test/stub-jar/dynamic-mixin-stub.jar",
         "-Xplugin-require:autoproxy"
 //        "-Xprint:generatesynthetics",
 //        "-Xprint:lazyvals",
@@ -66,8 +70,6 @@ with Eclipsify
 //        "-Ybrowse:lazyvals"
 //        "-Yshow-trees"
 //        "-Yshow-trees"
-//        "-usejavacp",
-//        "-nobootcp"
 //        "-Xplugin-list"
 //        "-Xshow-phases"
       ) ++ super.compileOptions
