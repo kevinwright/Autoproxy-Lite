@@ -16,3 +16,7 @@ Example
         }
 
 Note that DynamicMixin must also subclass SomeClass, to ensure that it will type-check correctly before the methods are generated.  This requirement will be dropped in the full autoproxy plugin.
+
+Logic for deciding what methods to Proxy
+----------------------------------------
+

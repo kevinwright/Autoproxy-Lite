@@ -59,10 +59,10 @@ with Eclipsify
 //        "-usejavacp",
 //        "-nobootcp",
 //        "-Xplugin:plugin/src/test/stub-jar/dynamic-mixin-stub.jar",
-        "-Xplugin-require:autoproxy"
+        "-Xplugin-require:autoproxy",
 //        "-Xprint:generatesynthetics",
 //        "-Xprint:lazyvals",
-//        "-Ylog:generatesynthetics",
+        "-Ylog:generatesynthetics"
 //        "-Ylog:lambdalift",
 //        "-Ydebug",
 //        "-Yshow-syms",

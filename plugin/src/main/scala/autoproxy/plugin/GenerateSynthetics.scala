@@ -55,7 +55,7 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       log("target getter = " + tgtGetter)
 
       val selectTarget = This(owner) DOT tgtGetter DOT tgtMethod
-      log("SelectTarget = " + nodeToString(selectTarget))
+//      log("SelectTarget = " + nodeToString(selectTarget))
 
       val rhs: Tree =
         delegate.info match {
@@ -64,11 +64,11 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
         }
 
       //global.analyzer.UnTyper.traverse(rhs)
-      log("rhs=" + nodeToString(rhs))
+//      log("rhs=" + nodeToString(rhs))
 
       val delegateDef = localTyper.typed {DEF(delegate) === rhs}
 
-      log("delegate = " + nodeToString(delegateDef))
+//      log("delegate = " + nodeToString(delegateDef))
 
       delegateDef
     }
@@ -81,6 +81,10 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
 
 
     def generateDelegates(templ: Template, symbolToProxy: Symbol): List[Tree] = {
+      def equiv(a: Symbol) = (b: Symbol) => {
+        (a.nameString == b.nameString) && (a.tpe =:= b.tpe)
+      }
+      
       val cls = symbolToProxy.owner //the class owning the symbol
 
       log("proxying symbol: " + symbolToProxy)
@@ -99,17 +103,21 @@ class GenerateSynthetics(plugin: AutoProxyPlugin, val global: Global) extends Pl
       // now locate all methods on the receiving class, and separate those which are inherited
       val definedMethods = publicMethodsOf(cls)
       val inheritedMethods = definedMethods.filter(_.owner != cls)
-      val locallyDefinedMethods = definedMethods.filter(_.owner == cls).flatMap(_.allOverriddenSymbols)
-      log("locally defined: " + locallyDefinedMethods.mkString(", "))
+      val localMethods = definedMethods.filter(_.owner == cls)
+      val localMethodAncestors = localMethods.flatMap(_.allOverriddenSymbols)
+      val localExclusions = (localMethods ++ localMethodAncestors).distinct
+      log("local exclusions: " + localExclusions.mkString(", "))
 
       //determine all methods that should be excluded from consideration for proxying
-      val exclusions = inheritedExclusions ++ locallyDefinedMethods
+      val exclusions = (inheritedExclusions ++ localExclusions).distinct
       log("all exclusions: " + exclusions.mkString(", "))
+      val nameTpeStrs = exclusions map (sym => sym.name.toString + ": " + sym.tpe.toString)
+      log("all exclusions: " + nameTpeStrs.mkString(", "))
 
       //now locate all methods available via the proxy source, and remove exclusions
       val candidates = publicMembersOf(symbolToProxy)
       log("candidates: " + candidates.mkString(", "))
-      val requiredMethods = candidates filterNot (exclusions contains)
+      val requiredMethods = candidates filterNot (c => exclusions exists equiv(c))
       log("required methods (candidates - exclusions): " + requiredMethods.mkString(", "))
 
       val needsOverride = requiredMethods.filterNot(_.isIncompleteIn(cls))
