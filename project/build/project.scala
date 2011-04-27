@@ -18,7 +18,7 @@ with Eclipsify
   // Sub-projects
   
   lazy val theAnnotation = project("annotation", "Annotation", new TheAnnotation(_))
-  lazy val thePlugin = project("plugin", "The plugin", new ThePlugin(_))
+  lazy val thePlugin = project("plugin", "The plugin", new ThePlugin(_), theAnnotation)
   lazy val examples = project("examples", "Examples", new Examples(_))
 
   class TheAnnotation(info: ProjectInfo) extends DefaultProject(info) with IdeaProject
@@ -53,23 +53,24 @@ with Eclipsify
 
     class ExampleProject(info: ProjectInfo) extends DefaultProject(info) with IdeaProject {
 
+
+      override def compileClasspath = thePlugin.runClasspath
       override def compileOptions = compileOptions(
         "-Xplugin:./plugin/target/scala_" + buildScalaVersion + "/the-plugin_" + buildScalaVersion + "-2.9.jar",
 //        "-verbose",
 //        "-usejavacp",
 //        "-nobootcp",
 //        "-Xplugin:plugin/src/test/stub-jar/dynamic-mixin-stub.jar",
-        "-Xplugin-require:autoproxy",
+        "-Xplugin-require:autoproxy"
 //        "-Xprint:generatesynthetics",
 //        "-Xprint:lazyvals",
-        "-Ylog:generatesynthetics"
+//        "-Ylog:generatesynthetics",
 //        "-Ylog:lambdalift",
 //        "-Ydebug",
-//        "-Yshow-syms",
+//        "-Yshow-syms"
 //        "-Ycheck:generatesynthetics"
 //        "-Ycheck:lazyvals"
 //        "-Ybrowse:lazyvals"
-//        "-Yshow-trees"
 //        "-Yshow-trees"
 //        "-Xplugin-list"
 //        "-Xshow-phases"
