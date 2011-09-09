@@ -63,10 +63,16 @@ object PluginBuild extends Build {
 //  import deps*._
   import BuildSettings._
 
+  lazy val root = Project(
+    id = "autoproxy-lite",
+    base = file(".")
+  ) aggregate(annotation, plugin, examples)
+
   lazy val annotation = Project(
     "annotation",
     file("annotation"),
-    settings = buildSettings )
+    settings = buildSettings
+  )
 
   lazy val plugin = Project(
     "plugin",
@@ -83,6 +89,11 @@ object PluginBuild extends Build {
     )
   ) dependsOn (annotation)
 
+  lazy val examples = Project(
+    id = "examples",
+    base = file("examples")
+  ) aggregate(simpleExamples)
+  
   lazy val simpleExamples = Project(
     "simpleExamples",
     file("examples/simple"),
